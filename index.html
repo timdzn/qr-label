@@ -60,8 +60,37 @@
     }
 
     header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
       padding: 16px 22px 14px;
       border-bottom: 1px solid var(--line);
+    }
+
+    .lang {
+      display: flex;
+      flex: none;
+      margin-top: 2px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .lang button {
+      height: 32px;
+      padding: 0 12px;
+      border: 0;
+      background: transparent;
+      font-size: 13px;
+    }
+
+    .lang button + button { border-left: 1px solid var(--line); }
+
+    .lang button[aria-pressed="true"] {
+      background: var(--ink);
+      color: #fff;
     }
 
     h1 {
@@ -393,19 +422,25 @@
 <body>
   <div class="app">
     <header>
-      <h1>二维码标签</h1>
-      <p>生成二维码，并把内容印在二维码下方。可以改二维码大小、字号，以及用哪种尺寸的标签纸。</p>
+      <div>
+        <h1 data-i18n="title">二维码标签</h1>
+        <p data-i18n="subtitle">生成二维码，并把内容印在二维码下方。可以改二维码大小、字号，以及用哪种尺寸的标签纸。</p>
+      </div>
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" data-lang="zh" aria-pressed="true">中文</button>
+        <button type="button" data-lang="id" aria-pressed="false">Indonesia</button>
+      </div>
     </header>
     <main>
       <section class="panel">
         <div class="field">
-          <label for="content">内容</label>
+          <label for="content" data-i18n="content">内容</label>
           <textarea id="content" spellcheck="false" placeholder="A1-1-01&#10;A1-1-02">A1-1-01</textarea>
           <p class="fine" id="hint"></p>
         </div>
 
         <div class="field">
-          <div class="field-label">标签纸</div>
+          <div class="field-label" data-i18n="paper">标签纸</div>
           <div class="presets" id="presets">
             <button type="button" data-size="30x20">30×20</button>
             <button type="button" data-size="40x30">40×30</button>
@@ -421,63 +456,63 @@
             <button type="button" data-size="100x150">100×150</button>
           </div>
           <div class="pair">
-            <label>宽
+            <label><span data-i18n="width">宽</span>
               <span class="with-unit"><input id="paper-w" type="number" min="15" max="300" step="1" value="50" inputmode="numeric"> mm</span>
             </label>
             <span class="times">×</span>
-            <label>高
+            <label><span data-i18n="height">高</span>
               <span class="with-unit"><input id="paper-h" type="number" min="15" max="300" step="1" value="40" inputmode="numeric"> mm</span>
             </label>
           </div>
         </div>
 
         <div class="field">
-          <label for="qr">二维码边长</label>
+          <label for="qr" data-i18n="qrSize">二维码边长</label>
           <div class="slider-line">
-            <input id="qr" type="range" min="8" max="40" step="0.5" value="28" aria-label="二维码边长">
+            <input id="qr" type="range" min="8" max="40" step="0.5" value="28" data-i18n-aria="qrSize" aria-label="二维码边长">
             <input id="qr-num" type="number" min="8" max="40" step="0.5" value="28" inputmode="decimal">
             <span class="suffix">mm</span>
           </div>
-          <p class="fine">这个尺寸含二维码四周的空白边。</p>
+          <p class="fine" data-i18n="qrSizeHint">这个尺寸含二维码四周的空白边。</p>
         </div>
 
         <div class="field">
-          <label for="font">字号</label>
+          <label for="font" data-i18n="fontSize">字号</label>
           <div class="slider-line">
-            <input id="font" type="range" min="5" max="48" step="0.5" value="12" aria-label="字号">
+            <input id="font" type="range" min="5" max="48" step="0.5" value="12" data-i18n-aria="fontSize" aria-label="字号">
             <input id="font-num" type="number" min="5" max="48" step="0.5" value="12" inputmode="decimal">
-            <span class="suffix">磅</span>
+            <span class="suffix" data-i18n="fontUnit">磅</span>
           </div>
           <p class="fine" id="font-mm">大约 4.2 mm 高</p>
         </div>
 
-        <button type="button" class="text-btn" id="fit">按标签纸适配</button>
+        <button type="button" class="text-btn" id="fit" data-i18n="fit">按标签纸适配</button>
 
         <div class="actions">
-          <button type="button" class="primary" id="print">打印</button>
-          <button type="button" class="secondary" id="download">下载图片</button>
+          <button type="button" class="primary" id="print" data-i18n="print">打印</button>
+          <button type="button" class="secondary" id="download" data-i18n="download">下载图片</button>
         </div>
-        <p class="fine" id="action-hint">打印时选实际大小，并关掉页眉页脚。每张标签单独一页。</p>
+        <p class="fine" id="action-hint" data-i18n="printHint">打印时选实际大小，并关掉页眉页脚。每张标签单独一页。</p>
         <p class="status" id="status"></p>
 
         <details class="more">
-          <summary>边框与纠错</summary>
-          <label class="check"><input type="checkbox" id="border" checked> 印出一圈边框</label>
-          <label class="stack">纠错级别
+          <summary data-i18n="more">边框与纠错</summary>
+          <label class="check"><input type="checkbox" id="border" checked> <span data-i18n="border">印出一圈边框</span></label>
+          <label class="stack"><span data-i18n="ecc">纠错级别</span>
             <select id="ecc">
-              <option value="L">L · 容错约 7%</option>
-              <option value="M" selected>M · 容错约 15%</option>
-              <option value="Q">Q · 容错约 25%</option>
-              <option value="H">H · 容错约 30%，标签容易磨损时用</option>
+              <option value="L" data-i18n="eccL">L · 容错约 7%</option>
+              <option value="M" data-i18n="eccM" selected>M · 容错约 15%</option>
+              <option value="Q" data-i18n="eccQ">Q · 容错约 25%</option>
+              <option value="H" data-i18n="eccH">H · 容错约 30%，标签容易磨损时用</option>
             </select>
           </label>
-          <button type="button" class="text-btn" id="reset">恢复默认尺寸</button>
+          <button type="button" class="text-btn" id="reset" data-i18n="reset">恢复默认尺寸</button>
         </details>
       </section>
 
       <section class="stage" id="stage">
         <div class="stage-toolbar">
-          <label class="actual"><input type="checkbox" id="actual"> 按实际尺寸看</label>
+          <label class="actual"><input type="checkbox" id="actual"> <span data-i18n="actual">按实际尺寸看</span></label>
         </div>
         <div class="stage-body" id="stage-body">
           <div class="sheet" id="sheet">
@@ -485,9 +520,9 @@
           </div>
           <p class="caption" id="caption"></p>
           <div class="pager" id="pager" hidden>
-            <button type="button" id="prev">上一张</button>
+            <button type="button" id="prev" data-i18n="prev">上一张</button>
             <span id="pager-label"></span>
-            <button type="button" id="next">下一张</button>
+            <button type="button" id="next" data-i18n="next">下一张</button>
           </div>
         </div>
       </section>
@@ -503,6 +538,130 @@
       const QUIET = 4;
       const FONT_FAMILY = '"Microsoft YaHei","PingFang SC","Noto Sans SC","SimHei",sans-serif';
       const STORAGE_KEY = "qr-label-generator";
+      const I18N = {
+        zh: {
+          title: "二维码标签",
+          subtitle: "生成二维码，并把内容印在二维码下方。可以改二维码大小、字号，以及用哪种尺寸的标签纸。",
+          content: "内容",
+          paper: "标签纸",
+          width: "宽",
+          height: "高",
+          qrSize: "二维码边长",
+          qrSizeHint: "这个尺寸含二维码四周的空白边。",
+          fontSize: "字号",
+          fontUnit: "磅",
+          fontMm: "大约 {mm} mm 高",
+          fit: "按标签纸适配",
+          print: "打印",
+          printAll: "打印全部 {n} 张",
+          printing: "正在生成…",
+          download: "下载图片",
+          printHint: "打印时选实际大小，并关掉页眉页脚。每张标签单独一页。",
+          more: "边框与纠错",
+          border: "印出一圈边框",
+          ecc: "纠错级别",
+          eccL: "L · 容错约 7%",
+          eccM: "M · 容错约 15%",
+          eccQ: "Q · 容错约 25%",
+          eccH: "H · 容错约 30%，标签容易磨损时用",
+          reset: "恢复默认尺寸",
+          actual: "按实际尺寸看",
+          prev: "上一张",
+          next: "下一张",
+          hintOne: "一行一条。文字会印在二维码下面。",
+          hintMany: "共 {n} 张。一行一条，文字印在对应的二维码下面。",
+          captionActual: "{size}，按实际尺寸显示",
+          captionZoom: "{size}，预览放大 {zoom} 倍",
+          emptyCanvas: "请输入内容",
+          emptyStatus: "输入内容后就会生成二维码。",
+          failCanvas: "无法生成",
+          failStatus: "这段内容生成不了二维码。可以缩短文字，或把纠错级别调低。",
+          dense: "二维码太密，这个尺寸里每个格子只能画成 1 个像素，打印后扫不到。",
+          overflow: "文字超出了标签。把字号调小，或把二维码缩小，给文字留出位置。",
+          moduleBad: "格子大约 {mm} 毫米，打印后很难扫描。请加大二维码，或换更大的标签纸。",
+          moduleWarn: "格子大约 {mm} 毫米，偏小。加大二维码会更好扫。",
+          moduleOk: "格子大约 {mm} 毫米，打印后可以扫描。",
+          confirmMany: "一共 {n} 张标签，生成和打印会久一点。继续吗？",
+          printNone: "这些内容都没能生成二维码，所以没有送去打印。",
+          printSkipped: "有 {skipped} 张没能生成，其余 {ok} 张会送去打印。",
+          missingLib: "二维码组件没有加载。请让 qrcode.js 和这个页面留在同一个文件夹。",
+          filePrefix: "二维码标签"
+        },
+        id: {
+          title: "Label kode QR",
+          subtitle: "Buat kode QR dan cetak isinya di bawah kode. Ukuran kode, ukuran huruf, dan ukuran kertas label bisa diubah.",
+          content: "Isi",
+          paper: "Kertas label",
+          width: "Lebar",
+          height: "Tinggi",
+          qrSize: "Sisi kode QR",
+          qrSizeHint: "Ukuran ini sudah termasuk pinggiran kosong di sekeliling kode.",
+          fontSize: "Ukuran huruf",
+          fontUnit: "pt",
+          fontMm: "Tinggi sekitar {mm} mm",
+          fit: "Sesuaikan dengan kertas",
+          print: "Cetak",
+          printAll: "Cetak semua {n} label",
+          printing: "Menyiapkan…",
+          download: "Unduh gambar",
+          printHint: "Saat mencetak, pilih ukuran sebenarnya dan matikan header serta footer. Satu label per halaman.",
+          more: "Bingkai dan koreksi",
+          border: "Cetak bingkai",
+          ecc: "Tingkat koreksi",
+          eccL: "L · toleransi sekitar 7%",
+          eccM: "M · toleransi sekitar 15%",
+          eccQ: "Q · toleransi sekitar 25%",
+          eccH: "H · toleransi sekitar 30%, untuk label yang mudah aus",
+          reset: "Kembalikan ukuran awal",
+          actual: "Lihat ukuran sebenarnya",
+          prev: "Sebelumnya",
+          next: "Berikutnya",
+          hintOne: "Satu baris untuk satu label. Teks dicetak di bawah kode QR.",
+          hintMany: "Total {n} label. Satu baris untuk satu label, teks dicetak di bawah kode yang sesuai.",
+          captionActual: "{size}, ukuran sebenarnya",
+          captionZoom: "{size}, pratinjau diperbesar {zoom} kali",
+          emptyCanvas: "Masukkan isi",
+          emptyStatus: "Kode QR muncul setelah isi dimasukkan.",
+          failCanvas: "Gagal dibuat",
+          failStatus: "Isi ini tidak bisa dijadikan kode QR. Perpendek teks, atau turunkan tingkat koreksi.",
+          dense: "Kode QR terlalu rapat. Pada ukuran ini tiap kotak hanya 1 piksel, jadi tidak bisa dipindai setelah dicetak.",
+          overflow: "Teks melebihi label. Kecilkan huruf, atau kecilkan kode QR agar teks muat.",
+          moduleBad: "Tiap kotak sekitar {mm} mm, sulit dipindai setelah dicetak. Perbesar kode QR, atau pakai kertas yang lebih besar.",
+          moduleWarn: "Tiap kotak sekitar {mm} mm, agak kecil. Perbesar kode QR agar lebih mudah dipindai.",
+          moduleOk: "Tiap kotak sekitar {mm} mm, bisa dipindai setelah dicetak.",
+          confirmMany: "Ada {n} label. Membuat dan mencetaknya butuh waktu lebih lama. Lanjutkan?",
+          printNone: "Semua isi gagal dibuat menjadi kode QR, jadi tidak ada yang dicetak.",
+          printSkipped: "{skipped} label gagal dibuat. {ok} label lainnya akan dicetak.",
+          missingLib: "Komponen kode QR tidak termuat. Biarkan qrcode.js satu folder dengan halaman ini.",
+          filePrefix: "Label-QR"
+        }
+      };
+
+      let lang = "zh";
+
+      function t(key, vars) {
+        let text = (I18N[lang] && I18N[lang][key]) || I18N.zh[key] || key;
+        if (vars) {
+          Object.entries(vars).forEach(([name, value]) => {
+            text = text.replaceAll(`{${name}}`, String(value));
+          });
+        }
+        return text;
+      }
+
+      function applyStatic() {
+        document.documentElement.lang = lang === "id" ? "id" : "zh-CN";
+        document.title = t("title");
+        document.querySelectorAll("[data-i18n]").forEach((el) => {
+          el.textContent = t(el.dataset.i18n);
+        });
+        document.querySelectorAll("[data-i18n-aria]").forEach((el) => {
+          el.setAttribute("aria-label", t(el.dataset.i18nAria));
+        });
+        document.querySelectorAll(".lang button").forEach((btn) => {
+          btn.setAttribute("aria-pressed", btn.dataset.lang === lang ? "true" : "false");
+        });
+      }
 
       const contentEl = document.getElementById("content");
       const hintEl = document.getElementById("hint");
@@ -539,7 +698,7 @@
 
       if (typeof qrcode !== "function") {
         statusEl.className = "status bad";
-        statusEl.textContent = "二维码组件没有加载。请让 qrcode.js 和这个页面留在同一个文件夹。";
+        statusEl.textContent = t("missingLib");
         return;
       }
       qrcode.stringToBytes = qrcode.stringToBytesFuncs["UTF-8"];
@@ -655,19 +814,19 @@
         canvas._layout = null;
 
         if (!text) {
-          paintCenterText(ctx, "请输入内容", widthPx, heightPx, "#a8a29e");
-          return { ok: false, level: "muted", message: "输入内容后就会生成二维码。" };
+          paintCenterText(ctx, t("emptyCanvas"), widthPx, heightPx, "#a8a29e");
+          return { ok: false, level: "muted", message: t("emptyStatus") };
         }
 
         let qr;
         try {
           qr = buildQr(text);
         } catch (err) {
-          paintCenterText(ctx, "无法生成", widthPx, heightPx, "#991b1b");
+          paintCenterText(ctx, t("failCanvas"), widthPx, heightPx, "#991b1b");
           return {
             ok: false,
             level: "bad",
-            message: "这段内容生成不了二维码。可以缩短文字，或把纠错级别调低。"
+            message: t("failStatus")
           };
         }
 
@@ -710,18 +869,18 @@
 
         const moduleMm = qrDraw.cell / PX_PER_MM;
         const bits = [];
-        if (qrDraw.dense) bits.push("二维码太密，这个尺寸里每个格子只能画成 1 个像素，打印后扫不到。");
-        if (textOverflow) bits.push("文字超出了标签。把字号调小，或把二维码缩小，给文字留出位置。");
+        if (qrDraw.dense) bits.push(t("dense"));
+        if (textOverflow) bits.push(t("overflow"));
         let level = "ok";
         const mm = moduleMm.toFixed(2);
         if (moduleMm < 0.25) {
           level = "bad";
-          bits.push(`格子大约 ${mm} 毫米，打印后很难扫描。请加大二维码，或换更大的标签纸。`);
+          bits.push(t("moduleBad", { mm }));
         } else if (moduleMm < 0.4) {
           level = "warn";
-          bits.push(`格子大约 ${mm} 毫米，偏小。加大二维码会更好扫。`);
+          bits.push(t("moduleWarn", { mm }));
         } else {
-          bits.push(`格子大约 ${mm} 毫米，打印后可以扫描。`);
+          bits.push(t("moduleOk", { mm }));
         }
         if ((textOverflow || qrDraw.dense) && level === "ok") level = "warn";
         if (qrDraw.dense) level = "bad";
@@ -784,12 +943,12 @@
         }
         const sizeText = `${formatNum(committedW)} × ${formatNum(committedH)} mm`;
         if (actual) {
-          captionEl.textContent = `${sizeText}，按实际尺寸显示`;
+          captionEl.textContent = t("captionActual", { size: sizeText });
           return;
         }
         const rect = sheetEl.getBoundingClientRect();
         const zoom = (rect.width / committedW) / (96 / 25.4);
-        captionEl.textContent = `${sizeText}，预览放大 ${zoom.toFixed(1)} 倍`;
+        captionEl.textContent = t("captionZoom", { size: sizeText, zoom: zoom.toFixed(1) });
       }
 
       function render() {
@@ -801,16 +960,16 @@
         const result = drawLabel(labelCanvas, text);
         const fontPt = parseFloat(fontRange.value);
         const fontMm = fontPt * 25.4 / 72;
-        fontMmEl.textContent = `大约 ${fontMm.toFixed(1)} mm 高`;
+        fontMmEl.textContent = t("fontMm", { mm: fontMm.toFixed(1) });
         hintEl.textContent = texts.length > 1
-          ? `共 ${texts.length} 张。一行一条，文字印在对应的二维码下面。`
-          : "一行一条。文字会印在二维码下面。";
+          ? t("hintMany", { n: texts.length })
+          : t("hintOne");
         statusEl.className = `status ${result.level}`;
         statusEl.textContent = result.message;
         const canUse = texts.length > 0 && result.ok;
         printBtn.disabled = printing || texts.length === 0;
         downloadBtn.disabled = !canUse;
-        printBtn.textContent = texts.length > 1 ? `打印全部 ${texts.length} 张` : "打印";
+        printBtn.textContent = texts.length > 1 ? t("printAll", { n: texts.length }) : t("print");
         pagerEl.hidden = texts.length < 2;
         if (texts.length > 1) {
           const shown = text.length > 18 ? `${text.slice(0, 18)}…` : text;
@@ -834,7 +993,8 @@
               font: parseFloat(fontRange.value),
               ecc: eccEl.value,
               border: borderEl.checked,
-              actual: actualEl.checked
+              actual: actualEl.checked,
+              lang
             }));
           } catch (err) {
             /* 浏览器禁用本地存储时仍可继续使用 */
@@ -871,6 +1031,7 @@
         if (["L", "M", "Q", "H"].includes(data.ecc)) eccEl.value = data.ecc;
         if (typeof data.border === "boolean") borderEl.checked = data.border;
         if (typeof data.actual === "boolean") actualEl.checked = data.actual;
+        if (data.lang === "id" || data.lang === "zh") lang = data.lang;
       }
 
       function setPaper(w, h) {
@@ -973,10 +1134,10 @@
       async function onPrint() {
         const texts = lines();
         if (!texts.length || printing) return;
-        if (texts.length > 60 && !confirm(`一共 ${texts.length} 张标签，生成和打印会久一点。继续吗？`)) return;
+        if (texts.length > 60 && !confirm(t("confirmMany", { n: texts.length }))) return;
         printing = true;
         printBtn.disabled = true;
-        printBtn.textContent = "正在生成…";
+        printBtn.textContent = t("printing");
         try {
           printStyle.textContent = [
             `@page { size: ${committedW}mm ${committedH}mm; margin: 0; }`,
@@ -1009,12 +1170,12 @@
           });
           if (!printRoot.childElementCount) {
             statusEl.className = "status bad";
-            statusEl.textContent = "这些内容都没能生成二维码，所以没有送去打印。";
+            statusEl.textContent = t("printNone");
             return;
           }
           if (skipped) {
             statusEl.className = "status warn";
-            statusEl.textContent = `有 ${skipped} 张没能生成，其余 ${printRoot.childElementCount} 张会送去打印。`;
+            statusEl.textContent = t("printSkipped", { skipped, ok: printRoot.childElementCount });
           }
           await Promise.all([...printRoot.querySelectorAll("img")].map((img) => img.decode().catch(() => {})));
           window.print();
@@ -1034,7 +1195,7 @@
         const safe = text.replace(/[\\/:*?"<>|\s]+/g, "_").slice(0, 40);
         const a = document.createElement("a");
         a.href = canvas.toDataURL("image/png");
-        a.download = `二维码标签_${Math.round(committedW)}x${Math.round(committedH)}_${safe}.png`;
+        a.download = `${t("filePrefix")}_${Math.round(committedW)}x${Math.round(committedH)}_${safe}.png`;
         a.click();
       }
 
@@ -1074,8 +1235,16 @@
         if (event.key === "ArrowRight") shift(1);
       });
 
+      document.querySelector(".lang").addEventListener("click", (event) => {
+        const btn = event.target.closest("button");
+        if (!btn || btn.dataset.lang === lang) return;
+        lang = btn.dataset.lang === "id" ? "id" : "zh";
+        applyStatic();
+        render();
+      });
       new ResizeObserver(() => layoutSheet()).observe(stageBody);
       loadSaved();
+      applyStatic();
       render();
       requestAnimationFrame(layoutSheet);
     })();
