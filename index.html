@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>二维码标签</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1c1917;
+      --muted: #57534e;
+      --line: #d6d1c7;
+      --panel: #f4f1ea;
+      --stage: #d9d3c7;
+      --ok: #3f6212;
+      --ok-bg: #f0fdf4;
+      --warn: #92400e;
+      --warn-bg: #fffbeb;
+      --bad: #991b1b;
+      --bad-bg: #fef2f2;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+    }
+
+    body {
+      height: 100dvh;
+      overflow: hidden;
+      color: var(--ink);
+      background: var(--panel);
+      font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+      font-size: 15px;
+    }
+
+    button, input, textarea, select { font: inherit; color: inherit; }
+
+    button { cursor: pointer; border-radius: 4px; }
+
+    button:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible,
+    select:focus-visible {
+      outline: 2px solid var(--ink);
+      outline-offset: 2px;
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .app {
+      height: 100%;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    header {
+      padding: 16px 22px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    header p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13.5px;
+      line-height: 1.5;
+    }
+
+    main {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 400px minmax(0, 1fr);
+    }
+
+    .panel {
+      min-height: 0;
+      overflow: auto;
+      padding: 18px 20px 28px;
+      border-right: 1px solid var(--line);
+    }
+
+    .field { margin: 0 0 16px; }
+
+    .field > label,
+    .field-label,
+    .stack {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .fine {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.5;
+    }
+
+    textarea, select, .pair input, .slider-line input[type="number"] {
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: #fff;
+    }
+
+    textarea {
+      display: block;
+      width: 100%;
+      min-height: 108px;
+      padding: 8px 10px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .presets button {
+      height: 32px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      background: #fff;
+      font-size: 13px;
+    }
+
+    .presets button:hover { background: #fafaf9; }
+
+    .presets button[aria-pressed="true"] {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: #fff;
+    }
+
+    .pair {
+      display: grid;
+      grid-template-columns: max-content auto max-content;
+      justify-content: start;
+      gap: 10px;
+      align-items: end;
+      margin-top: 10px;
+    }
+
+    .pair label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .with-unit {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .with-unit input {
+      width: 76px;
+      min-width: 0;
+      padding: 8px 10px;
+    }
+
+    .times {
+      padding-bottom: 8px;
+      color: var(--muted);
+    }
+
+    .slider-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .slider-line input[type="range"] {
+      flex: 1;
+      accent-color: var(--ink);
+    }
+
+    .slider-line input[type="number"] {
+      width: 76px;
+      padding: 7px 8px;
+    }
+
+    .suffix {
+      width: 1.6em;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .primary, .secondary, .pager button {
+      height: 40px;
+      padding: 0 12px;
+    }
+
+    .primary {
+      background: var(--ink);
+      color: #fff;
+      border: 1px solid var(--ink);
+    }
+
+    .primary:hover:not(:disabled) { background: #292524; }
+
+    .secondary, .pager button {
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .secondary:hover:not(:disabled),
+    .pager button:hover:not(:disabled) { background: #fafaf9; }
+
+    .text-btn {
+      display: block;
+      width: 100%;
+      margin-top: 4px;
+      padding: 6px;
+      background: transparent;
+      border: 0;
+      color: #44403c;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .text-btn:hover { color: var(--ink); }
+
+    .status {
+      margin: 12px 0 0;
+      padding: 8px 10px;
+      border-radius: 4px;
+      background: #f5f5f4;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .status.ok { background: var(--ok-bg); color: var(--ok); }
+    .status.warn { background: var(--warn-bg); color: var(--warn); }
+    .status.bad { background: var(--bad-bg); color: var(--bad); }
+
+    .more {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    .more summary {
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    .stack { margin-top: 12px; }
+
+    .stack select {
+      display: block;
+      width: 100%;
+      margin-top: 8px;
+      padding: 8px 10px;
+    }
+
+    .stage {
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      background: var(--stage);
+    }
+
+    .stage-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      padding: 12px 16px 0;
+    }
+
+    .actual {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+    }
+
+    .stage-body {
+      min-height: 0;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: safe center;
+      gap: 12px;
+      padding: 12px 24px 28px;
+    }
+
+    .sheet {
+      flex: none;
+      width: 280px;
+      height: 224px;
+      background: #fff;
+      box-shadow: 0 12px 30px rgba(28, 25, 23, 0.16), 0 0 0 1px rgba(28, 25, 23, 0.06);
+    }
+
+    .sheet canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .caption {
+      margin: 0;
+      color: var(--ink);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .pager {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pager[hidden] { display: none; }
+
+    .pager button { height: 32px; padding: 0 12px; }
+
+    .pager span {
+      min-width: 9em;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    #print-root {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @media (max-width: 900px) {
+      body { height: auto; overflow: auto; }
+      .app { height: auto; }
+      main { grid-template-columns: 1fr; }
+      .panel { border-right: 0; border-bottom: 1px solid var(--line); }
+      .stage { min-height: 560px; }
+    }
+
+    @media print {
+      .app { display: none !important; }
+      #print-root {
+        display: block !important;
+        position: static !important;
+        width: auto !important;
+        height: auto !important;
+        overflow: visible !important;
+        opacity: 1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>二维码标签</h1>
+      <p>生成二维码，并把内容印在二维码下方。可以改二维码大小、字号，以及用哪种尺寸的标签纸。</p>
+    </header>
+    <main>
+      <section class="panel">
+        <div class="field">
+          <label for="content">内容</label>
+          <textarea id="content" spellcheck="false" placeholder="A1-1-01&#10;A1-1-02">A1-1-01</textarea>
+          <p class="fine" id="hint"></p>
+        </div>
+
+        <div class="field">
+          <div class="field-label">标签纸</div>
+          <div class="presets" id="presets">
+            <button type="button" data-size="30x20">30×20</button>
+            <button type="button" data-size="40x30">40×30</button>
+            <button type="button" data-size="40x60">40×60</button>
+            <button type="button" data-size="50x30">50×30</button>
+            <button type="button" data-size="50x40">50×40</button>
+            <button type="button" data-size="60x40">60×40</button>
+            <button type="button" data-size="70x40">70×40</button>
+            <button type="button" data-size="80x50">80×50</button>
+            <button type="button" data-size="100x50">100×50</button>
+            <button type="button" data-size="100x80">100×80</button>
+            <button type="button" data-size="100x100">100×100</button>
+            <button type="button" data-size="100x150">100×150</button>
+          </div>
+          <div class="pair">
+            <label>宽
+              <span class="with-unit"><input id="paper-w" type="number" min="15" max="300" step="1" value="50" inputmode="numeric"> mm</span>
+            </label>
+            <span class="times">×</span>
+            <label>高
+              <span class="with-unit"><input id="paper-h" type="number" min="15" max="300" step="1" value="40" inputmode="numeric"> mm</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="qr">二维码边长</label>
+          <div class="slider-line">
+            <input id="qr" type="range" min="8" max="40" step="0.5" value="28" aria-label="二维码边长">
+            <input id="qr-num" type="number" min="8" max="40" step="0.5" value="28" inputmode="decimal">
+            <span class="suffix">mm</span>
+          </div>
+          <p class="fine">这个尺寸含二维码四周的空白边。</p>
+        </div>
+
+        <div class="field">
+          <label for="font">字号</label>
+          <div class="slider-line">
+            <input id="font" type="range" min="5" max="48" step="0.5" value="12" aria-label="字号">
+            <input id="font-num" type="number" min="5" max="48" step="0.5" value="12" inputmode="decimal">
+            <span class="suffix">磅</span>
+          </div>
+          <p class="fine" id="font-mm">大约 4.2 mm 高</p>
+        </div>
+
+        <button type="button" class="text-btn" id="fit">按标签纸适配</button>
+
+        <div class="actions">
+          <button type="button" class="primary" id="print">打印</button>
+          <button type="button" class="secondary" id="download">下载图片</button>
+        </div>
+        <p class="fine" id="action-hint">打印时选实际大小，并关掉页眉页脚。每张标签单独一页。</p>
+        <p class="status" id="status"></p>
+
+        <details class="more">
+          <summary>边框与纠错</summary>
+          <label class="check"><input type="checkbox" id="border" checked> 印出一圈边框</label>
+          <label class="stack">纠错级别
+            <select id="ecc">
+              <option value="L">L · 容错约 7%</option>
+              <option value="M" selected>M · 容错约 15%</option>
+              <option value="Q">Q · 容错约 25%</option>
+              <option value="H">H · 容错约 30%，标签容易磨损时用</option>
+            </select>
+          </label>
+          <button type="button" class="text-btn" id="reset">恢复默认尺寸</button>
+        </details>
+      </section>
+
+      <section class="stage" id="stage">
+        <div class="stage-toolbar">
+          <label class="actual"><input type="checkbox" id="actual"> 按实际尺寸看</label>
+        </div>
+        <div class="stage-body" id="stage-body">
+          <div class="sheet" id="sheet">
+            <canvas id="label"></canvas>
+          </div>
+          <p class="caption" id="caption"></p>
+          <div class="pager" id="pager" hidden>
+            <button type="button" id="prev">上一张</button>
+            <span id="pager-label"></span>
+            <button type="button" id="next">下一张</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div id="print-root"></div>
+  <style id="print-style"></style>
+  <script src="qrcode.js"></script>
+  <script>
+    (() => {
+      const PRINT_DPI = 300;
+      const PX_PER_MM = PRINT_DPI / 25.4;
+      const QUIET = 4;
+      const FONT_FAMILY = '"Microsoft YaHei","PingFang SC","Noto Sans SC","SimHei",sans-serif';
+      const STORAGE_KEY = "qr-label-generator";
+
+      const contentEl = document.getElementById("content");
+      const hintEl = document.getElementById("hint");
+      const wInput = document.getElementById("paper-w");
+      const hInput = document.getElementById("paper-h");
+      const qrRange = document.getElementById("qr");
+      const qrNum = document.getElementById("qr-num");
+      const fontRange = document.getElementById("font");
+      const fontNum = document.getElementById("font-num");
+      const fontMmEl = document.getElementById("font-mm");
+      const borderEl = document.getElementById("border");
+      const eccEl = document.getElementById("ecc");
+      const actualEl = document.getElementById("actual");
+      const statusEl = document.getElementById("status");
+      const captionEl = document.getElementById("caption");
+      const sheetEl = document.getElementById("sheet");
+      const stageBody = document.getElementById("stage-body");
+      const labelCanvas = document.getElementById("label");
+      const printBtn = document.getElementById("print");
+      const downloadBtn = document.getElementById("download");
+      const pagerEl = document.getElementById("pager");
+      const pagerLabel = document.getElementById("pager-label");
+      const prevBtn = document.getElementById("prev");
+      const nextBtn = document.getElementById("next");
+      const printRoot = document.getElementById("print-root");
+      const printStyle = document.getElementById("print-style");
+      const presetButtons = [...document.querySelectorAll("#presets button")];
+
+      let committedW = 50;
+      let committedH = 40;
+      let index = 0;
+      let printing = false;
+      let saveTimer = 0;
+
+      if (typeof qrcode !== "function") {
+        statusEl.className = "status bad";
+        statusEl.textContent = "二维码组件没有加载。请让 qrcode.js 和这个页面留在同一个文件夹。";
+        return;
+      }
+      qrcode.stringToBytes = qrcode.stringToBytesFuncs["UTF-8"];
+
+      function clamp(v, min, max) {
+        return Math.min(max, Math.max(min, v));
+      }
+
+      function formatNum(v) {
+        const n = Math.round(Number(v) * 10) / 10;
+        if (!Number.isFinite(n)) return "";
+        return Number.isInteger(n) ? String(n) : n.toFixed(1);
+      }
+
+      function roundStep(v, step) {
+        return Math.round(Math.round(v / step) * step * 1000) / 1000;
+      }
+
+      function lines() {
+        return contentEl.value.split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+      }
+
+      function fontCss(px) {
+        return `700 ${px}px ${FONT_FAMILY}`;
+      }
+
+      function wrapText(ctx, text, maxWidth) {
+        if (!text) return [];
+        if (ctx.measureText(text).width <= maxWidth) return [text];
+        const out = [];
+        let current = "";
+        for (const ch of text) {
+          const next = current + ch;
+          if (current && ctx.measureText(next).width > maxWidth) {
+            out.push(current);
+            current = ch;
+          } else {
+            current = next;
+          }
+        }
+        if (current) out.push(current);
+        return out;
+      }
+
+      function strokeRoundRect(ctx, x, y, w, h, r) {
+        const radius = Math.max(0, Math.min(r, w / 2, h / 2));
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.arcTo(x + w, y, x + w, y + h, radius);
+        ctx.arcTo(x + w, y + h, x, y + h, radius);
+        ctx.arcTo(x, y + h, x, y, radius);
+        ctx.arcTo(x, y, x + w, y, radius);
+        ctx.closePath();
+        ctx.stroke();
+      }
+
+      function drawBorder(ctx, w, h) {
+        const inset = 1.05 * PX_PER_MM;
+        ctx.save();
+        ctx.strokeStyle = "#1c1917";
+        ctx.lineWidth = Math.max(1, 0.28 * PX_PER_MM);
+        strokeRoundRect(ctx, inset, inset, w - inset * 2, h - inset * 2, 1.15 * PX_PER_MM);
+        ctx.restore();
+      }
+
+      function paintCenterText(ctx, text, w, h, color) {
+        ctx.fillStyle = color;
+        ctx.font = `600 ${Math.max(12, Math.round(Math.min(w, h) * 0.08))}px ${FONT_FAMILY}`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, w / 2, h / 2);
+      }
+
+      function buildQr(text) {
+        const qr = qrcode(0, eccEl.value || "M");
+        qr.addData(text);
+        qr.make();
+        return qr;
+      }
+
+      function paintQr(ctx, qr, x, y, sizePx) {
+        const n = qr.getModuleCount();
+        const total = n + QUIET * 2;
+        let cell = Math.floor(sizePx / total);
+        const dense = cell < 1;
+        if (dense) cell = 1;
+        const drawn = cell * total;
+        const ox = Math.round(x + (sizePx - drawn) / 2);
+        const oy = Math.round(y + (sizePx - drawn) / 2);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(ox, oy, drawn, drawn);
+        ctx.fillStyle = "#000000";
+        for (let r = 0; r < n; r += 1) {
+          for (let c = 0; c < n; c += 1) {
+            if (qr.isDark(r, c)) {
+              ctx.fillRect(ox + (c + QUIET) * cell, oy + (r + QUIET) * cell, cell, cell);
+            }
+          }
+        }
+        return { cell, drawn, ox, oy, dense, n };
+      }
+
+      function drawLabel(canvas, text) {
+        const widthPx = Math.max(1, Math.round(committedW * PX_PER_MM));
+        const heightPx = Math.max(1, Math.round(committedH * PX_PER_MM));
+        canvas.width = widthPx;
+        canvas.height = heightPx;
+        const ctx = canvas.getContext("2d");
+        ctx.imageSmoothingEnabled = false;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, widthPx, heightPx);
+        if (borderEl.checked) drawBorder(ctx, widthPx, heightPx);
+        canvas._layout = null;
+
+        if (!text) {
+          paintCenterText(ctx, "请输入内容", widthPx, heightPx, "#a8a29e");
+          return { ok: false, level: "muted", message: "输入内容后就会生成二维码。" };
+        }
+
+        let qr;
+        try {
+          qr = buildQr(text);
+        } catch (err) {
+          paintCenterText(ctx, "无法生成", widthPx, heightPx, "#991b1b");
+          return {
+            ok: false,
+            level: "bad",
+            message: "这段内容生成不了二维码。可以缩短文字，或把纠错级别调低。"
+          };
+        }
+
+        const qrMm = parseFloat(qrRange.value);
+        const fontPt = parseFloat(fontRange.value);
+        const fontPx = fontPt * (PRINT_DPI / 72);
+        const gapPx = 1.6 * PX_PER_MM;
+        const maxTextW = Math.max(1, widthPx - 3 * PX_PER_MM);
+        ctx.font = fontCss(fontPx);
+        const textLines = wrapText(ctx, text, maxTextW);
+        const lineH = fontPx * 1.25;
+        const textH = textLines.length * lineH;
+        const qrPx = Math.max(1, Math.round(qrMm * PX_PER_MM));
+        const blockH = qrPx + gapPx + textH;
+        let top = Math.round((heightPx - blockH) / 2);
+        const minTop = Math.round(0.6 * PX_PER_MM);
+        if (top < minTop) top = minTop;
+        const qrX = Math.round((widthPx - qrPx) / 2);
+        const qrDraw = paintQr(ctx, qr, qrX, top, qrPx);
+        const textTop = top + qrPx + gapPx;
+
+        ctx.font = fontCss(fontPx);
+        ctx.fillStyle = "#111111";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        let textOverflow = false;
+        textLines.forEach((line, i) => {
+          const y = textTop + lineH * i + lineH / 2;
+          ctx.fillText(line, widthPx / 2, y);
+          if (ctx.measureText(line).width > widthPx - 1.2 * PX_PER_MM) textOverflow = true;
+          if (y + lineH / 2 > heightPx - 0.3 * PX_PER_MM) textOverflow = true;
+        });
+
+        canvas._layout = {
+          qr: { x: qrDraw.ox, y: qrDraw.oy, size: qrDraw.drawn, cell: qrDraw.cell, modules: qrDraw.n },
+          textTop,
+          textH,
+          lineH
+        };
+
+        const moduleMm = qrDraw.cell / PX_PER_MM;
+        const bits = [];
+        if (qrDraw.dense) bits.push("二维码太密，这个尺寸里每个格子只能画成 1 个像素，打印后扫不到。");
+        if (textOverflow) bits.push("文字超出了标签。把字号调小，或把二维码缩小，给文字留出位置。");
+        let level = "ok";
+        const mm = moduleMm.toFixed(2);
+        if (moduleMm < 0.25) {
+          level = "bad";
+          bits.push(`格子大约 ${mm} 毫米，打印后很难扫描。请加大二维码，或换更大的标签纸。`);
+        } else if (moduleMm < 0.4) {
+          level = "warn";
+          bits.push(`格子大约 ${mm} 毫米，偏小。加大二维码会更好扫。`);
+        } else {
+          bits.push(`格子大约 ${mm} 毫米，打印后可以扫描。`);
+        }
+        if ((textOverflow || qrDraw.dense) && level === "ok") level = "warn";
+        if (qrDraw.dense) level = "bad";
+        return { ok: true, level, message: bits.join("") };
+      }
+
+      function reservedTextMm() {
+        const fontPt = parseFloat(fontRange.value);
+        const fontMm = (Number.isFinite(fontPt) ? fontPt : 12) * 25.4 / 72;
+        const text = lines()[index] || lines()[0] || "";
+        let lineCount = 1;
+        if (text) {
+          const measure = document.createElement("canvas").getContext("2d");
+          measure.font = fontCss(100);
+          const maxPx = Math.max(8, committedW - 3) / fontMm * 100;
+          lineCount = Math.max(1, wrapText(measure, text, maxPx).length);
+        }
+        return fontMm * 1.25 * lineCount + 3.8;
+      }
+
+      function updateQrLimits() {
+        const side = Math.min(committedW, committedH);
+        const max = Math.max(4, Math.round(side * 2) / 2);
+        const min = Math.min(8, max);
+        let value = parseFloat(qrRange.value);
+        if (!Number.isFinite(value)) value = Math.min(max, 28);
+        qrRange.min = String(min);
+        qrRange.max = String(max);
+        qrNum.min = String(min);
+        qrNum.max = String(max);
+        if (value > max) {
+          value = Math.min(max, Math.max(min, committedH - reservedTextMm()));
+        }
+        value = roundStep(clamp(value, min, max), 0.5);
+        qrRange.value = String(value);
+        if (document.activeElement !== qrNum) qrNum.value = formatNum(value);
+      }
+
+      function updateChips() {
+        const w = Math.round(committedW);
+        const h = Math.round(committedH);
+        presetButtons.forEach((btn) => {
+          const [bw, bh] = btn.dataset.size.split("x").map(Number);
+          btn.setAttribute("aria-pressed", bw === w && bh === h ? "true" : "false");
+        });
+      }
+
+      function layoutSheet() {
+        const actual = actualEl.checked;
+        if (actual) {
+          sheetEl.style.width = committedW + "mm";
+          sheetEl.style.height = committedH + "mm";
+        } else {
+          const bounds = stageBody.getBoundingClientRect();
+          const maxW = Math.max(180, bounds.width - 48);
+          const maxH = Math.max(180, bounds.height - 72);
+          const scale = Math.min(maxW / committedW, maxH / committedH);
+          sheetEl.style.width = (committedW * scale) + "px";
+          sheetEl.style.height = (committedH * scale) + "px";
+        }
+        const sizeText = `${formatNum(committedW)} × ${formatNum(committedH)} mm`;
+        if (actual) {
+          captionEl.textContent = `${sizeText}，按实际尺寸显示`;
+          return;
+        }
+        const rect = sheetEl.getBoundingClientRect();
+        const zoom = (rect.width / committedW) / (96 / 25.4);
+        captionEl.textContent = `${sizeText}，预览放大 ${zoom.toFixed(1)} 倍`;
+      }
+
+      function render() {
+        updateQrLimits();
+        updateChips();
+        const texts = lines();
+        if (index > texts.length - 1) index = Math.max(0, texts.length - 1);
+        const text = texts[index] || "";
+        const result = drawLabel(labelCanvas, text);
+        const fontPt = parseFloat(fontRange.value);
+        const fontMm = fontPt * 25.4 / 72;
+        fontMmEl.textContent = `大约 ${fontMm.toFixed(1)} mm 高`;
+        hintEl.textContent = texts.length > 1
+          ? `共 ${texts.length} 张。一行一条，文字印在对应的二维码下面。`
+          : "一行一条。文字会印在二维码下面。";
+        statusEl.className = `status ${result.level}`;
+        statusEl.textContent = result.message;
+        const canUse = texts.length > 0 && result.ok;
+        printBtn.disabled = printing || texts.length === 0;
+        downloadBtn.disabled = !canUse;
+        printBtn.textContent = texts.length > 1 ? `打印全部 ${texts.length} 张` : "打印";
+        pagerEl.hidden = texts.length < 2;
+        if (texts.length > 1) {
+          const shown = text.length > 18 ? `${text.slice(0, 18)}…` : text;
+          pagerLabel.textContent = `${index + 1} / ${texts.length}  ${shown}`;
+          prevBtn.disabled = index <= 0;
+          nextBtn.disabled = index >= texts.length - 1;
+        }
+        layoutSheet();
+        scheduleSave();
+      }
+
+      function scheduleSave() {
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+              content: contentEl.value,
+              w: committedW,
+              h: committedH,
+              qr: parseFloat(qrRange.value),
+              font: parseFloat(fontRange.value),
+              ecc: eccEl.value,
+              border: borderEl.checked,
+              actual: actualEl.checked
+            }));
+          } catch (err) {
+            /* 浏览器禁用本地存储时仍可继续使用 */
+          }
+        }, 200);
+      }
+
+      function loadSaved() {
+        let data = null;
+        try {
+          data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        } catch (err) {
+          data = null;
+        }
+        if (!data || typeof data !== "object") return;
+        if (typeof data.content === "string") contentEl.value = data.content;
+        if (Number.isFinite(data.w)) {
+          committedW = clamp(Math.round(data.w), 15, 300);
+          wInput.value = String(committedW);
+        }
+        if (Number.isFinite(data.h)) {
+          committedH = clamp(Math.round(data.h), 15, 300);
+          hInput.value = String(committedH);
+        }
+        if (Number.isFinite(data.qr)) {
+          qrRange.value = String(data.qr);
+          qrNum.value = formatNum(data.qr);
+        }
+        if (Number.isFinite(data.font)) {
+          const font = clamp(data.font, 5, 48);
+          fontRange.value = String(font);
+          fontNum.value = formatNum(font);
+        }
+        if (["L", "M", "Q", "H"].includes(data.ecc)) eccEl.value = data.ecc;
+        if (typeof data.border === "boolean") borderEl.checked = data.border;
+        if (typeof data.actual === "boolean") actualEl.checked = data.actual;
+      }
+
+      function setPaper(w, h) {
+        committedW = w;
+        committedH = h;
+        wInput.value = String(w);
+        hInput.value = String(h);
+        render();
+      }
+
+      function bindPaper(input, axis) {
+        input.addEventListener("input", () => {
+          const v = parseFloat(input.value);
+          if (!Number.isFinite(v) || v < 15 || v > 300) return;
+          if (axis === "w") committedW = v;
+          else committedH = v;
+          render();
+        });
+        input.addEventListener("change", () => {
+          let v = parseFloat(input.value);
+          if (!Number.isFinite(v)) v = axis === "w" ? committedW : committedH;
+          v = clamp(Math.round(v), 15, 300);
+          if (axis === "w") committedW = v;
+          else committedH = v;
+          input.value = String(v);
+          render();
+        });
+      }
+
+      function bindRange(range, num) {
+        range.addEventListener("input", () => {
+          num.value = formatNum(range.value);
+          render();
+        });
+        num.addEventListener("input", () => {
+          const v = parseFloat(num.value);
+          const min = parseFloat(range.min);
+          const max = parseFloat(range.max);
+          if (!Number.isFinite(v) || v < min || v > max) return;
+          range.value = String(v);
+          render();
+        });
+        num.addEventListener("change", () => {
+          let v = parseFloat(num.value);
+          if (!Number.isFinite(v)) v = parseFloat(range.value);
+          v = roundStep(clamp(v, parseFloat(range.min), parseFloat(range.max)), 0.5);
+          range.value = String(v);
+          num.value = formatNum(v);
+          render();
+        });
+      }
+
+      function shift(step) {
+        const total = lines().length;
+        index = clamp(index + step, 0, Math.max(0, total - 1));
+        render();
+      }
+
+      function autoFit() {
+        const texts = lines();
+        const text = texts[index] || texts[0] || "A1-1-01";
+        const measure = document.createElement("canvas").getContext("2d");
+        const maxTextMm = Math.max(8, committedW - 3);
+        let fontPt = clamp(Math.round((committedH * 0.12 * 72 / 25.4) * 2) / 2, 6, 28);
+        const countLines = (pt) => {
+          const fontMm = pt * 25.4 / 72;
+          measure.font = fontCss(100);
+          const maxPx = maxTextMm / fontMm * 100;
+          return wrapText(measure, text, maxPx).length;
+        };
+        while (fontPt > 6 && countLines(fontPt) > 2) fontPt = Math.round((fontPt - 0.5) * 2) / 2;
+        const fontMm = fontPt * 25.4 / 72;
+        const textBlock = fontMm * 1.25 * countLines(fontPt);
+        const qr = Math.min(committedW - 3, committedH - 3 - textBlock - 1.6);
+        updateQrLimits();
+        const qrValue = roundStep(clamp(qr, parseFloat(qrRange.min), parseFloat(qrRange.max)), 0.5);
+        qrRange.value = String(qrValue);
+        qrNum.value = formatNum(qrValue);
+        fontRange.value = String(fontPt);
+        fontNum.value = formatNum(fontPt);
+        render();
+      }
+
+      function resetDefaults() {
+        committedW = 50;
+        committedH = 40;
+        wInput.value = "50";
+        hInput.value = "40";
+        borderEl.checked = true;
+        eccEl.value = "M";
+        actualEl.checked = false;
+        qrRange.max = "300";
+        qrRange.value = "28";
+        qrNum.value = "28";
+        fontRange.value = "12";
+        fontNum.value = "12";
+        render();
+      }
+
+      async function onPrint() {
+        const texts = lines();
+        if (!texts.length || printing) return;
+        if (texts.length > 60 && !confirm(`一共 ${texts.length} 张标签，生成和打印会久一点。继续吗？`)) return;
+        printing = true;
+        printBtn.disabled = true;
+        printBtn.textContent = "正在生成…";
+        try {
+          printStyle.textContent = [
+            `@page { size: ${committedW}mm ${committedH}mm; margin: 0; }`,
+            "@media print {",
+            "  #print-root img {",
+            `    width: ${committedW}mm;`,
+            `    height: ${committedH}mm;`,
+            "    display: block;",
+            "    page-break-after: always;",
+            "    break-after: page;",
+            "    print-color-adjust: exact;",
+            "    -webkit-print-color-adjust: exact;",
+            "  }",
+            "  #print-root img:last-child { page-break-after: auto; break-after: auto; }",
+            "}"
+          ].join("\n");
+          printRoot.replaceChildren();
+          let skipped = 0;
+          texts.forEach((text) => {
+            const canvas = document.createElement("canvas");
+            const result = drawLabel(canvas, text);
+            if (!result.ok) {
+              skipped += 1;
+              return;
+            }
+            const img = document.createElement("img");
+            img.alt = text;
+            img.src = canvas.toDataURL("image/png");
+            printRoot.appendChild(img);
+          });
+          if (!printRoot.childElementCount) {
+            statusEl.className = "status bad";
+            statusEl.textContent = "这些内容都没能生成二维码，所以没有送去打印。";
+            return;
+          }
+          if (skipped) {
+            statusEl.className = "status warn";
+            statusEl.textContent = `有 ${skipped} 张没能生成，其余 ${printRoot.childElementCount} 张会送去打印。`;
+          }
+          await Promise.all([...printRoot.querySelectorAll("img")].map((img) => img.decode().catch(() => {})));
+          window.print();
+        } finally {
+          printing = false;
+          render();
+        }
+      }
+
+      function onDownload() {
+        const texts = lines();
+        const text = texts[index];
+        if (!text) return;
+        const canvas = document.createElement("canvas");
+        const result = drawLabel(canvas, text);
+        if (!result.ok) return;
+        const safe = text.replace(/[\\/:*?"<>|\s]+/g, "_").slice(0, 40);
+        const a = document.createElement("a");
+        a.href = canvas.toDataURL("image/png");
+        a.download = `二维码标签_${Math.round(committedW)}x${Math.round(committedH)}_${safe}.png`;
+        a.click();
+      }
+
+      document.getElementById("presets").addEventListener("click", (event) => {
+        const btn = event.target.closest("button");
+        if (!btn) return;
+        const [w, h] = btn.dataset.size.split("x").map(Number);
+        setPaper(w, h);
+      });
+      bindPaper(wInput, "w");
+      bindPaper(hInput, "h");
+      bindRange(qrRange, qrNum);
+      bindRange(fontRange, fontNum);
+      contentEl.addEventListener("input", render);
+      borderEl.addEventListener("change", render);
+      eccEl.addEventListener("change", render);
+      actualEl.addEventListener("change", () => {
+        layoutSheet();
+        scheduleSave();
+      });
+      document.getElementById("fit").addEventListener("click", autoFit);
+      document.getElementById("reset").addEventListener("click", resetDefaults);
+      printBtn.addEventListener("click", onPrint);
+      downloadBtn.addEventListener("click", onDownload);
+      prevBtn.addEventListener("click", () => shift(-1));
+      nextBtn.addEventListener("click", () => shift(1));
+      window.addEventListener("afterprint", () => printRoot.replaceChildren());
+      document.addEventListener("keydown", (event) => {
+        const typing = event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLInputElement || event.target instanceof HTMLSelectElement;
+        if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+          event.preventDefault();
+          onPrint();
+          return;
+        }
+        if (typing) return;
+        if (event.key === "ArrowLeft") shift(-1);
+        if (event.key === "ArrowRight") shift(1);
+      });
+
+      new ResizeObserver(() => layoutSheet()).observe(stageBody);
+      loadSaved();
+      render();
+      requestAnimationFrame(layoutSheet);
+    })();
+  </script>
+</body>
+</html>
